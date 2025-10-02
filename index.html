@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      width: 400px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .input-group {
+      display: flex;
+      gap: 10px;
+    }
+    #todoInput {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    #addbtn {
+      padding: 10px 15px;
+      border: none;
+      background: #4CAF50;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #addbtn:hover {
+      background: #45a049;
+    }
+    .todo-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    .todo-text.completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+    .action-btn {
+      margin-left: 5px;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .edit-btn {
+      background: #2196F3;
+      color: white;
+    }
+    .delete-btn {
+      background: #f44336;
+      color: white;
+    }
+    .todo-checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #4CAF50;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    .todo-checkbox.checked {
+      background: #4CAF50;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📋 Todo App</h2>
+    <div class="input-group">
+      <input type="text" id="todoInput" placeholder="Yangi vazifa qo'shish...">
+      <button id="addbtn">Qo'shish</button>
+    </div>
+    <div id="todoList" style="margin-top:20px;"></div>
+  </div>
+
+  <script>
+    let todos = [];
+    let updateId = null;
+
+    const todosInput = document.getElementById("todoInput");
+    const addBtn = document.getElementById("addbtn");
+    const todoList = document.getElementById("todoList");
+
+    addBtn.addEventListener("click", addTodo);
+    todosInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") addTodo();
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      renderTodos();
+    });
+
+    function addTodo() {
+      const todoText = todosInput.value.trim();
+      if (todoText === '') {
+        alert("Hech narsa kiritilmadi!");
+        return;
+      }
+
+      if (updateId) {
+        updated(updateId, todoText);
+      } else {
+        todos.push({
+          id: Date.now(),
+          text: todoText,
+          isCompleted: false,
+        });
+      }
+
+      renderTodos();
+      todosInput.value = '';
+    }
+
+    function toggleTodo(id) {
+      todos = todos.map(todo =>
+        todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
+      );
+      renderTodos();
+    }
+
+    function deleteTodo(id) {
+      todos = todos.filter(todo => todo.id !== id);
+      renderTodos();
+    }
+
+    function editTodo(id) {
+      updateId = id;
+      addBtn.innerText = "O'zgartirish";
+      todosInput.value = todos.find(todo => todo.id === id).text;
+    }
+
+    function updated(id, newText) {
+      todos = todos.map(todo =>
+        todo.id === id ? { ...todo, text: newText } : todo
+      );
+      addBtn.innerText = "Qo'shish";
+      updateId = null;
+    }
+
+    function renderTodos() {
+      if (todos.length === 0) {
+        todoList.innerHTML = "<p>Hech qanday ma'lumot topilmadi!</p>";
+        return;
+      }
+
+      todoList.innerHTML = todos
+        .map(
+          (todo) => `
+          <div class="todo-item">
+            <div style="display:flex;align-items:center;">
+              <div class="todo-checkbox ${todo.isCompleted ? 'checked' : ''}" onclick="toggleTodo(${todo.id})"></div>
+              <div class="todo-text ${todo.isCompleted ? 'completed' : ''}">
+                ${todo.text}
+              </div>
+            </div>
+            <div class="todo-actions">
+              <button class="action-btn edit-btn" onclick="editTodo(${todo.id})">Tahrir</button>
+              <button class="action-btn delete-btn" onclick="deleteTodo(${todo.id})">O'chir</button>
+            </div>
+          </div>
+        `
+        )
+        .join('');
+    }
+  </script>
+</body>
+</html>
